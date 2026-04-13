@@ -1,0 +1,75 @@
+:host {
+  display: block;
+}
+
+.monitor-shell {
+  margin-top: 2rem;
+  width: min(1100px, 100%);
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.meta {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: end;
+  color: #cbd5e1;
+
+  strong {
+    font-size: 1rem;
+    color: #f8fafc;
+  }
+
+  span {
+    color: #94a3b8;
+  }
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.loading,
+.error {
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.error {
+  color: #fda4af;
+}
+
+@media (max-width: 720px) {
+  .title-row {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .meta {
+    justify-items: start;
+  }
+}

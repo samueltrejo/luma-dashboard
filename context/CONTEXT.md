@@ -21,13 +21,17 @@ A personal dashboard for Samuel Trejo that will surface personal, family, and wo
 - Nginx reverse proxy configured for `/api`
 - Docker Compose added
 - README added with quick start and structure overview
+- Added `/api/server/metrics` with live CPU, memory, disk, network, uptime, temperature, power, process, GPU placeholder, hostname, and timestamp data
+- Added `/api/server/cost` using a fixed power rate (`0.117/kWh`) with daily, weekly, monthly, and yearly estimates
+- Added standalone Angular Server Monitor section with dedicated CPU, memory, disk, network, uptime, temperature, power, GPU placeholder, and top process panels
+- Verified backend endpoints locally on port `3001` and confirmed Angular production build succeeds
 
 ## What's Next
 - Authentication and access control
 - Personal/family/work widget system
-- Server monitoring panels and alert states
+- Alerting and thresholds for server anomalies
 - External integrations (homelab, cloud, calendars, finances, services)
 - Persistent configuration and environment management
 
 ## Current Status
-Initial scaffold complete and ready for iterative feature development.
+Server monitoring feature is now integrated end-to-end and the dashboard is ready for the next round of widgets and alerting.
