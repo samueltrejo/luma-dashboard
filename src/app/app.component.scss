@@ -1,0 +1,84 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.hero-card {
+  width: min(960px, 100%);
+  padding: clamp(2rem, 4vw, 4rem);
+  border-radius: 28px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(16px);
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #f8fafc;
+  opacity: 0.72;
+  font-size: 0.8rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  line-height: 0.95;
+}
+
+.tagline {
+  margin: 1rem 0 0;
+  font-size: 1.15rem;
+  color: #cbd5e1;
+}
+
+.status-grid {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.status-card {
+  padding: 1.25rem;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+
+  .label {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #94a3b8;
+  }
+
+  strong {
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+    color: #f8fafc;
+  }
+
+  p {
+    margin: 0;
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+}
+
+.meta {
+  margin-top: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}

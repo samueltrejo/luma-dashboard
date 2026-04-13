@@ -1,0 +1,11 @@
+node_modules
+server/node_modules
+dist
+.angular
+.git
+.gitignore
+Dockerfile
+server/Dockerfile
+README.md
+context
+.vscode
