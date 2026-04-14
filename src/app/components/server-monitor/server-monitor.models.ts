@@ -52,8 +52,11 @@ export interface ServerMetricsResponse {
 
 export interface ServerCostResponse {
   ratePerKwh: number;
+  watts: number;
   dailyCost: number;
   weeklyCost: number;
   monthlyCost: number;
   yearlyCost: number;
+  sampleCount: number;
+  isRollingAverage: boolean;
 }

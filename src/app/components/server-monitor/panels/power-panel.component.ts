@@ -12,7 +12,12 @@ import { ServerCostResponse, ServerPower } from '../server-monitor.models';
         <span>Power Consumption</span>
         <strong>{{ power?.watts === null || power?.watts === undefined ? 'N/A' : (power?.watts | number: '1.0-2') + ' W' }}</strong>
       </div>
-      <p>Source: {{ power?.powerSource ?? 'placeholder' }}</p>
+      <p>
+        Source: {{ power?.powerSource ?? 'placeholder' }}
+        <span class="avg-badge" *ngIf="cost?.isRollingAverage">
+          24h avg &#x2022; {{ cost?.sampleCount }} samples
+        </span>
+      </p>
       <div class="cost-grid" *ngIf="cost">
         <span>Daily {{ cost.dailyCost | currency }}</span>
         <span>Weekly {{ cost.weeklyCost | currency }}</span>

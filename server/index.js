@@ -11,6 +11,54 @@ const app = express();
 const port = process.env.PORT || 3000;
 const ENERGY_RATE_PER_KWH = 0.117;
 
+// Rolling 24-hour power buffer: samples every 30s = 2880 max entries
+const POWER_BUFFER_MAX = 2880;
+const POWER_SAMPLE_INTERVAL_MS = 30000;
+const powerBuffer = [];
+
+function collectPowerSample() {
+  const raplPowerPath = '/sys/class/powercap/intel-rapl:0/power_uw';
+  const raplPower = Number(safeReadFile(raplPowerPath) || NaN);
+  if (Number.isFinite(raplPower) && raplPower > 0) {
+    const watts = Number((raplPower / 1000000).toFixed(2));
+    pushPowerSample(watts, 'ipmi');
+    return;
+  }
+
+  execFile('ipmitool', ['dcmi', 'power', 'reading'], { timeout: 3000 }, (err, stdout) => {
+    if (!err && stdout) {
+      const match = stdout.match(/Instantaneous power reading:\s+(\d+)\s+Watts/i);
+      if (match) {
+        pushPowerSample(Number(match[1]), 'ipmi');
+        return;
+      }
+    }
+    // Fallback: estimate based on current CPU idle
+    execFile('ps', ['-o', 'pcpu=', '--no-headers', '-p', '1'], { timeout: 2000 }, (e, out) => {
+      const cpuUsage = 0; // placeholder; real impl could parse this
+      pushPowerSample(35 + cpuUsage * 0.9, 'estimated');
+    });
+  });
+}
+
+function pushPowerSample(watts, source) {
+  powerBuffer.push({ watts: Number.isFinite(watts) ? watts : 0, source });
+  if (powerBuffer.length > POWER_BUFFER_MAX) {
+    powerBuffer.shift();
+  }
+}
+
+function getBufferedAverageWatts() {
+  if (powerBuffer.length === 0) return null;
+  const sum = powerBuffer.reduce((acc, s) => acc + s.watts, 0);
+  return Number((sum / powerBuffer.length).toFixed(2));
+}
+
+// Start background power collection
+setInterval(collectPowerSample, POWER_SAMPLE_INTERVAL_MS);
+// Collect immediately on startup so we don't wait 30s for first sample
+setTimeout(collectPowerSample, 2000);
+
 app.use(cors());
 app.use(express.json());
 
@@ -243,7 +291,7 @@ async function getServerMetrics() {
   };
 }
 
-function buildCostResponse(powerWatts) {
+function buildCostResponse(powerWatts, hasBufferedData = false) {
   const watts = Number.isFinite(powerWatts) ? powerWatts : 0;
   const dailyCost = Number((((watts / 1000) * 24) * ENERGY_RATE_PER_KWH).toFixed(4));
   const weeklyCost = Number((dailyCost * 7).toFixed(4));
@@ -252,10 +300,13 @@ function buildCostResponse(powerWatts) {
 
   return {
     ratePerKwh: ENERGY_RATE_PER_KWH,
+    watts,
     dailyCost,
     weeklyCost,
     monthlyCost,
-    yearlyCost
+    yearlyCost,
+    sampleCount: powerBuffer.length,
+    isRollingAverage: hasBufferedData
   };
 }
 
@@ -284,16 +335,10 @@ app.get('/api/server/metrics', async (_req, res) => {
   }
 });
 
-app.get('/api/server/cost', async (_req, res) => {
-  try {
-    const metrics = await getServerMetrics();
-    res.json(buildCostResponse(metrics.power?.watts));
-  } catch (error) {
-    res.status(500).json({
-      message: 'Unable to calculate server cost',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
+app.get('/api/server/cost', (_req, res) => {
+  const avgWatts = getBufferedAverageWatts();
+  const watts = avgWatts ?? 0;
+  res.json(buildCostResponse(watts, avgWatts !== null));
 });
 
 app.listen(port, '0.0.0.0', () => {
