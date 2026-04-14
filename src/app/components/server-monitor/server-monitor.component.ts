@@ -55,6 +55,8 @@ import { ServerCostResponse, ServerMetricsResponse } from './server-monitor.mode
         <app-gpu-panel [gpu]="current.gpu" />
         <app-disk-panel [volumes]="current.disk" />
         <app-network-panel [interfaces]="current.network" />
+      </div>
+      <div class="panel-full-width" *ngIf="metrics() as current">
         <app-processes-panel [processes]="current.processes" />
       </div>
     </section>
