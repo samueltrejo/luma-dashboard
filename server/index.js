@@ -5,6 +5,8 @@ const os = require('os');
 const path = require('path');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
+const { dbPath, getDb } = require('./db');
+const aiUsageRoutes = require('./ai-usage.routes');
 
 const execFileAsync = promisify(execFile);
 const app = express();
@@ -33,9 +35,9 @@ function collectPowerSample() {
         return;
       }
     }
-    // Fallback: estimate based on current CPU idle
-    execFile('ps', ['-o', 'pcpu=', '--no-headers', '-p', '1'], { timeout: 2000 }, (e, out) => {
-      const cpuUsage = 0; // placeholder; real impl could parse this
+
+    execFile('ps', ['-o', 'pcpu=', '--no-headers', '-p', '1'], { timeout: 2000 }, () => {
+      const cpuUsage = 0;
       pushPowerSample(35 + cpuUsage * 0.9, 'estimated');
     });
   });
@@ -54,13 +56,12 @@ function getBufferedAverageWatts() {
   return Number((sum / powerBuffer.length).toFixed(2));
 }
 
-// Start background power collection
 setInterval(collectPowerSample, POWER_SAMPLE_INTERVAL_MS);
-// Collect immediately on startup so we don't wait 30s for first sample
 setTimeout(collectPowerSample, 2000);
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/ai-usage', aiUsageRoutes);
 
 function safeReadFile(filePath) {
   try {
@@ -310,13 +311,29 @@ function buildCostResponse(powerWatts, hasBufferedData = false) {
   };
 }
 
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
+  let database = null;
+  try {
+    await getDb();
+    database = {
+      status: 'ok',
+      path: dbPath
+    };
+  } catch (error) {
+    database = {
+      status: 'error',
+      path: dbPath,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+
   res.json({
     status: 'ok',
     service: 'Luma Dashboard API',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    version: '1.0.0'
+    version: '1.0.0',
+    database
   });
 });
 
@@ -341,6 +358,13 @@ app.get('/api/server/cost', (_req, res) => {
   res.json(buildCostResponse(watts, avgWatts !== null));
 });
 
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, '0.0.0.0', async () => {
+  try {
+    await getDb();
+    console.log(`SQLite ready at ${dbPath}`);
+  } catch (error) {
+    console.error('Failed to initialize SQLite database', error);
+  }
+
   console.log(`Luma Dashboard API listening on port ${port}`);
 });

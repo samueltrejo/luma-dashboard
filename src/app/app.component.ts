@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { AiUsageComponent } from './components/ai-usage/ai-usage.component';
 import { ServerMonitorComponent } from './components/server-monitor/server-monitor.component';
 
 @Component({
   selector: 'app-root',
-  imports: [ServerMonitorComponent],
+  imports: [ServerMonitorComponent, AiUsageComponent],
   template: `
     <main class="shell">
       <header class="branding">
@@ -14,6 +15,7 @@ import { ServerMonitorComponent } from './components/server-monitor/server-monit
         </p>
       </header>
 
+      <app-ai-usage></app-ai-usage>
       <app-server-monitor></app-server-monitor>
     </main>
   `,
