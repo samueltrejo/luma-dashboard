@@ -41,3 +41,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Runtime data
+/data/*.sqlite
+/data/*.sqlite-shm
+/data/*.sqlite-wal

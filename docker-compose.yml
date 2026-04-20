@@ -15,6 +15,9 @@ services:
       dockerfile: Dockerfile
     environment:
       PORT: 3000
+      DASHBOARD_DATA_DIR: /app/data
+    volumes:
+      - ./data:/app/data
     expose:
       - '3000'
     restart: unless-stopped

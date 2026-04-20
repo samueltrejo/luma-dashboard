@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 
-const dataDir = path.join(__dirname, 'data');
+const dataDir = process.env.DASHBOARD_DATA_DIR
+  ? path.resolve(process.env.DASHBOARD_DATA_DIR)
+  : path.resolve(__dirname, '..', 'data');
 const dbPath = path.join(dataDir, 'dashboard.sqlite');
 
 let db;
