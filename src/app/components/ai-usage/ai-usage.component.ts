@@ -30,27 +30,19 @@ import { CodexUsageResponse, CodexUsageSnapshot } from './ai-usage.models';
         <article class="panel-card" *ngFor="let window of windows()">
           <div class="panel-header">
             <span>{{ window.windowName }}</span>
-            <strong>{{ formatPercent(window) }}</strong>
+            <strong>{{ formatPercentLeft(window) }}</strong>
           </div>
 
-          <div class="usage-bar">
-            <div
-              class="usage-fill"
-              [class.warn]="(window.usagePercent ?? 0) >= 70 && (window.usagePercent ?? 0) < 90"
-              [class.danger]="(window.usagePercent ?? 0) >= 90"
-              [style.width.%]="clampPercent(window.usagePercent)"
-            ></div>
-          </div>
-
-          <div class="stats-grid">
-            <span>Used</span>
-            <strong>{{ formatMinutes(window.usageMinutesUsed) }}</strong>
-            <span>Limit</span>
-            <strong>{{ formatMinutes(window.usageMinutesLimit) }}</strong>
-            <span>Reset</span>
-            <strong>{{ window.resetAt ? (window.resetAt | date: 'medium') : 'Unknown' }}</strong>
-            <span>Source</span>
-            <strong>{{ window.source }}</strong>
+          <div class="usage-meter">
+            <div class="usage-bar">
+              <div
+                class="usage-fill"
+                [class.warn]="leftPercent(window) <= 30 && leftPercent(window) > 10"
+                [class.danger]="leftPercent(window) <= 10"
+                [style.width.%]="usedPercent(window.usagePercent)"
+              ></div>
+            </div>
+            <div class="reset-time">Resets {{ formatResetTime(window.resetAt) }}</div>
           </div>
         </article>
       </div>
@@ -125,8 +117,33 @@ export class AiUsageComponent {
     return Math.max(0, Math.min(100, percent));
   }
 
+  usedPercent(percent: number | null): number {
+    return this.clampPercent(percent);
+  }
+
+  leftPercent(snapshot: CodexUsageSnapshot): number {
+    return Math.max(0, 100 - this.usedPercent(snapshot.usagePercent));
+  }
+
   formatPercent(snapshot: CodexUsageSnapshot): string {
     return snapshot.usagePercent == null ? 'N/A' : `${snapshot.usagePercent.toFixed(1)}%`;
+  }
+
+  formatPercentLeft(snapshot: CodexUsageSnapshot): string {
+    return snapshot.usagePercent == null ? 'N/A left' : `${this.leftPercent(snapshot).toFixed(0)}% left`;
+  }
+
+  formatResetTime(resetAt: string | null): string {
+    if (!resetAt) {
+      return 'Unknown';
+    }
+
+    return new Date(resetAt).toLocaleString([], {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
   }
 
   formatMinutes(value: number | null): string {
