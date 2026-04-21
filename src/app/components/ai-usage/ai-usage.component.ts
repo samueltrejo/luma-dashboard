@@ -39,7 +39,7 @@ import { CodexUsageResponse, CodexUsageSnapshot } from './ai-usage.models';
                 class="usage-fill"
                 [class.warn]="leftPercent(window) <= 30 && leftPercent(window) > 10"
                 [class.danger]="leftPercent(window) <= 10"
-                [style.width.%]="usedPercent(window.usagePercent)"
+                [style.width.%]="leftPercent(window)"
               ></div>
             </div>
             <div class="reset-time">Resets {{ formatResetTime(window.resetAt) }}</div>
