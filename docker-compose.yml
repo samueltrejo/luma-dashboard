@@ -13,6 +13,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+    user: "1000:1000"
     environment:
       PORT: 3000
       DASHBOARD_DATA_DIR: /app/data
