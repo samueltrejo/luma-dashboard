@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { interval } from 'rxjs';
@@ -9,72 +9,36 @@ import { CodexUsageResponse, CodexUsageSnapshot } from './ai-usage.models';
 @Component({
   selector: 'app-ai-usage',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule],
   template: `
-    <section class="usage-shell">
-      <div class="title-row">
-        <div>
-          <p class="eyebrow">AI Usage</p>
-          <h2>Codex Usage</h2>
-        </div>
-        <div class="meta" *ngIf="latestUpdatedAt() as updatedAt">
-          <strong>Latest snapshot</strong>
-          <span>{{ updatedAt | date: 'medium' }}</span>
-        </div>
-      </div>
+      <ng-container *ngIf="loading(); else content">
+        <div class="loading">Loading Codex usage...</div>
+      </ng-container>
 
-      <div class="loading" *ngIf="loading()">Loading Codex usage...</div>
-      <div class="error" *ngIf="error()">{{ error() }}</div>
+      <ng-template #content>
+        <div class="error" *ngIf="error()">{{ error() }}</div>
 
-      <div class="panel-grid" *ngIf="windows().length">
-        <article class="panel-card" *ngFor="let window of windows()">
-          <div class="panel-header">
-            <span>{{ window.windowName }}</span>
-            <strong>{{ formatPercentLeft(window) }}</strong>
-          </div>
-
-          <div class="usage-meter">
-            <div class="usage-bar">
-              <div
-                class="usage-fill"
-                [class.warn]="leftPercent(window) <= 30 && leftPercent(window) > 10"
-                [class.danger]="leftPercent(window) <= 10"
-                [style.width.%]="leftPercent(window)"
-              ></div>
+        <ng-container *ngIf="!error()">
+          <article class="panel-card" *ngFor="let window of windows()">
+            <div class="panel-header">
+              <span>{{ window.windowName }}</span>
+              <strong>{{ formatPercentLeft(window) }}</strong>
             </div>
-            <div class="reset-time">Resets {{ formatResetTime(window.resetAt) }}</div>
-          </div>
-        </article>
-      </div>
 
-      <article class="panel-card history-card" *ngIf="history().length">
-        <div class="panel-header">
-          <span>Recent snapshots</span>
-          <strong>{{ history().length }}</strong>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Window</th>
-              <th>Used</th>
-              <th>Limit</th>
-              <th>Percent</th>
-              <th>Captured</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let snapshot of history()">
-              <td>{{ snapshot.windowName }}</td>
-              <td>{{ formatMinutes(snapshot.usageMinutesUsed) }}</td>
-              <td>{{ formatMinutes(snapshot.usageMinutesLimit) }}</td>
-              <td>{{ formatPercent(snapshot) }}</td>
-              <td>{{ snapshot.capturedAt | date: 'short' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </article>
-    </section>
+            <div class="usage-meter">
+              <div class="usage-bar compact">
+                <div
+                  class="usage-fill"
+                  [class.warn]="leftPercent(window) <= 30 && leftPercent(window) > 10"
+                  [class.danger]="leftPercent(window) <= 10"
+                  [style.width.%]="leftPercent(window)"
+                ></div>
+              </div>
+              <div class="reset-time">Resets {{ formatResetTime(window.resetAt) }}</div>
+            </div>
+          </article>
+        </ng-container>
+      </ng-template>
   `,
   styleUrl: './ai-usage.component.scss'
 })
@@ -125,10 +89,6 @@ export class AiUsageComponent {
     return Math.max(0, 100 - this.usedPercent(snapshot.usagePercent));
   }
 
-  formatPercent(snapshot: CodexUsageSnapshot): string {
-    return snapshot.usagePercent == null ? 'N/A' : `${snapshot.usagePercent.toFixed(1)}%`;
-  }
-
   formatPercentLeft(snapshot: CodexUsageSnapshot): string {
     return snapshot.usagePercent == null ? 'N/A left' : `${this.leftPercent(snapshot).toFixed(0)}% left`;
   }
@@ -146,7 +106,4 @@ export class AiUsageComponent {
     });
   }
 
-  formatMinutes(value: number | null): string {
-    return value == null ? 'N/A' : `${value.toFixed(1)} min`;
-  }
 }

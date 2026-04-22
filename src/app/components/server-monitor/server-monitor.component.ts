@@ -4,6 +4,7 @@ import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { forkJoin, interval } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AiUsageComponent } from '../ai-usage/ai-usage.component';
 import { CpuPanelComponent } from './panels/cpu-panel.component';
 import { DiskPanelComponent } from './panels/disk-panel.component';
 import { GpuPanelComponent } from './panels/gpu-panel.component';
@@ -20,6 +21,7 @@ import { ServerCostResponse, ServerMetricsResponse } from './server-monitor.mode
   standalone: true,
   imports: [
     CommonModule,
+    AiUsageComponent,
     CpuPanelComponent,
     MemoryPanelComponent,
     DiskPanelComponent,
@@ -53,6 +55,7 @@ import { ServerCostResponse, ServerMetricsResponse } from './server-monitor.mode
         <app-temperature-panel [temperature]="current.temperature" />
         <app-power-panel [power]="current.power" [cost]="cost()" />
         <app-gpu-panel [gpu]="current.gpu" />
+        <app-ai-usage />
         <!-- <app-disk-panel [volumes]="current.disk" /> -->
         <app-network-panel [interfaces]="current.network" />
       </div>
