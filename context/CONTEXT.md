@@ -58,3 +58,6 @@ A personal dashboard for Samuel Trejo that will surface personal, family, and wo
 
 ## Current Status
 Server monitoring is live, Codex usage persistence is wired in with SQLite, and the dashboard now exposes both infrastructure and AI usage data on port `3000`.
+
+## Working Conventions
+- After frontend/UI or dashboard code changes, rebuild the app and redeploy the Docker Compose stack so the live container reflects the latest changes.
